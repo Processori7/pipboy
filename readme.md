@@ -1,6 +1,6 @@
 # Описание
 Это доработанная версия pipboy, которая представлена в этой статье: https://vc.ru/u/3244565-rostislav-shackiy/1154205-fallout-style-chat-s-neyrosetyu-llama3-70b-dlya-lichnyh-nuzhd-i-horoshego-nastroeniya   
-В этой версии не нужно использовать ключу и другие сервисы для доступа к языковой модели. 
+В этой версии не нужно использовать ключи и другие сервисы для доступа к языковой модели. 
 # Использование
 1. Клонировать репозиторий:  
 ```git clone https://github.com/Processori7/pipboy.git```
