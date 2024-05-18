@@ -1,3 +1,4 @@
 colorama
 freeGPT
 asyncio
+pygame
