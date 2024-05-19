@@ -1,5 +1,6 @@
-import ctypes
 import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide" # Скрываю сообщения от pygame
+import ctypes
 import shutil
 import subprocess
 import sys
@@ -12,18 +13,31 @@ import winreg
 import pygame
 
 
+
 init()  # Инициализация colorama
 pygame.init()
 
 async def play_music():
     global is_music_playing
-    is_music_playing = True
-    pygame.mixer.music.load("music.mp3")
-    while True:
-        pygame.mixer.music.play()
-        while pygame.mixer.music.get_busy():
-            await asyncio.sleep(0.1)
-        pygame.mixer.music.rewind()
+    # Проверяем, существует ли файл music.mp3
+    if os.path.exists('music.mp3'):
+        is_music_playing = True
+        pygame.mixer.music.load("music.mp3")
+        while True:
+            pygame.mixer.music.play()
+            while pygame.mixer.music.get_busy():
+                await asyncio.sleep(0.1)
+            pygame.mixer.music.rewind()
+    else:
+        # Если файл не существует, устанавливаем путь к файлу
+        music_file_path = 'C:\\pipboy\\music.mp3'
+        is_music_playing = True
+        pygame.mixer.music.load(music_file_path)
+        while True:
+            pygame.mixer.music.play()
+            while pygame.mixer.music.get_busy():
+                await asyncio.sleep(0.1)
+            pygame.mixer.music.rewind()
 
 
 def add_to_path(path, root=winreg.HKEY_CURRENT_USER, key_path='Environment', access=winreg.KEY_ALL_ACCESS):
@@ -174,8 +188,9 @@ async def main():
             if not os.path.exists(pipboy_exe_path):
                 # Если файл не найден, копируем его из папки Desktop
                 desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
-                source_path = os.path.join(desktop_path, "ansi.exe")
+                source_path = os.path.join(desktop_path, "pipboy.exe")
                 shutil.copy(source_path, pipboy_folder)
+                shutil.copy('music.mp3', 'C:\\pipboy\\music.mp3')
 
             # Запуск основного цикла событий
         global music_task
@@ -239,7 +254,7 @@ async def main():
         )
         print_flush2(
             """
-            Pipboy GPT3 готова к общению.
+            Pipboy 3000 готов к общению.
             Основные команды: 
             - Введите 'выход' или 'ex' или 'exit', чтобы завершить.
             - Введите 'очистить' или 'cls' или 'clear', чтобы удалить переписку.
@@ -286,7 +301,7 @@ async def main():
                 # Сохранение истории в файл
                 with open("history.txt", "a") as f:
                     for entry in history:
-                        f.write(f"{entry[0]}\nВопрос пользователя: {entry[1]}\nОтвет Ansi: {entry[2]}\n\n")
+                        f.write(f"{entry[0]}\nВопрос пользователя: {entry[1]}\nОтвет PipBoy 3000: {entry[2]}\n\n")
 
     except KeyboardInterrupt:
         print("До свидания!")
