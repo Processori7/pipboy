@@ -13,7 +13,7 @@
 ```python -m venv venv```
 4. Активировать виртуальное окружение:  
 ```venv\Scripts\activate```
-4. Установить зависимости:  
+5. Установить зависимости:  
 ```pip install -r requirements.txt```
-5. Запустить файл: 
+6. Запустить файл: 
 ```python pipboy.py```
