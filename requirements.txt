@@ -2,3 +2,4 @@ colorama
 freeGPT
 asyncio
 pygame
+playsound==1.2.2

@@ -13,7 +13,6 @@ import winreg
 import pygame
 
 
-
 init()  # Инициализация colorama
 pygame.init()
 
