@@ -5,7 +5,7 @@ import shutil
 import subprocess
 import sys
 import time
-from freeGPT import AsyncClient
+from webscout import WEBS as w
 import asyncio
 from datetime import datetime
 from colorama import init, Fore
@@ -164,10 +164,10 @@ async def print_history():
 async def communicate_with_model(message):
     """Взаимодействует с моделью для генерации ответа."""
     try:
-        resp = await AsyncClient.create_completion("gpt3", message)
-        return resp
+        response = w().chat(message, model="claude-3-haiku")  # GPT-3.5 Turbo, mixtral-8x7b, llama-3-70b, claude-3-haiku
+        return response
     except Exception as e:
-        return f"Ошибка при общении с моделью: {e}"
+        return f"Ошибка при общении с ThinkAnyAI: {e}"
 
 
 async def main():
