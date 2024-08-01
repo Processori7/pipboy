@@ -1,16 +1,16 @@
 import os
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide" # Скрываю сообщения от pygame
+import winreg
+import pygame
+import asyncio
 import ctypes
 import shutil
 import subprocess
 import sys
 import time
 from webscout import WEBS as w
-import asyncio
 from datetime import datetime
 from colorama import init, Fore
-import winreg
-import pygame
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide" # Скрываю сообщения от pygame
 
 
 init()  # Инициализация colorama
@@ -164,7 +164,7 @@ async def print_history():
 async def communicate_with_model(message):
     """Взаимодействует с моделью для генерации ответа."""
     try:
-        response = w().chat(message, model="claude-3-haiku")  # GPT-3.5 Turbo, mixtral-8x7b, llama-3-70b, claude-3-haiku
+        response = w().chat(message, model="claude-3-haiku")  # GPT-4.o mini, mixtral-8x7b, llama-3-70b, claude-3-haiku
         return response
     except Exception as e:
         return f"Ошибка при общении с ThinkAnyAI: {e}"
