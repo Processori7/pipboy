@@ -4,7 +4,6 @@ import pygame
 import asyncio
 import ctypes
 import shutil
-import subprocess
 import sys
 import time
 from webscout import WEBS as w
@@ -71,7 +70,6 @@ def print_flush3(text):
         sys.stdout.flush()
     print()
     time.sleep(0.00003)  # Задержка перед очисткой терминала
-
 
 async def print_history():
     if os.path.exists("history.txt"):
@@ -164,11 +162,10 @@ async def print_history():
 async def communicate_with_model(message):
     """Взаимодействует с моделью для генерации ответа."""
     try:
-        response = w().chat(message, model="claude-3-haiku")  # GPT-4.o mini, mixtral-8x7b, llama-3-70b, claude-3-haiku
+        response = w().chat(message, model="gpt-4o-mini")  # GPT-4.o mini, mixtral-8x7b, llama-3-70b, claude-3-haiku
         return response
     except Exception as e:
         return f"Ошибка при общении с ThinkAnyAI: {e}"
-
 
 async def main():
     """Основная функция программы."""
@@ -305,7 +302,6 @@ async def main():
     except KeyboardInterrupt:
         print("До свидания!")
         music_task.cancel()
-
 
 if __name__ == "__main__":
     asyncio.run(main())
