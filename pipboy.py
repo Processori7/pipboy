@@ -159,10 +159,10 @@ async def print_history():
         print("Ой! История не найдена!\n")
 
 
-async def communicate_with_model(message):
+async def communicate_with_model(message, model):
     """Взаимодействует с моделью для генерации ответа."""
     try:
-        response = w().chat(message, model="gpt-4o-mini")  # GPT-4.o mini, mixtral-8x7b, llama-3-70b, claude-3-haiku
+        response = w().chat(message, model=model)  # o3-mini, GPT-4.o mini, mixtral-8x7b, llama-3-70b, claude-3-haiku
         return response
     except Exception as e:
         return f"Ошибка при общении с ThinkAnyAI: {e}"
@@ -256,7 +256,8 @@ async def main():
             - Введите 'очистить' или 'cls' или 'clear', чтобы удалить переписку.
             - Введите 'история' или 'hsitory', чтобы вывести истрию переписки на экран.
             - Введите 'музыка' или 'music' или 'старт' или 'start' для запуска музыки.
-            - Введите 'стоп' или 'stop' для остановки воспроизведения.\n
+            - Введите 'стоп' или 'stop' для остановки воспроизведения.
+            - Введите 'модель' или 'model' для выбора модели LLM.\n
             """)
 
         history = []
@@ -286,8 +287,37 @@ async def main():
                     is_music_playing = False
                     music_task.cancel()
                     music_task = None  # Устанавливаем music_task в None, но сохраняем ссылку на задачу
+            elif user_input.lower() in ['model', 'модель']:
+                models = {
+                    "claude-3-haiku": "claude-3-haiku-20240307",
+                    "gpt-4o-mini": "gpt-4o-mini",
+                    "llama-3.1-70b": "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+                    "mixtral-8x7b": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+                    "o3-mini": "o3-mini"
+                }
+                key = models.keys()
+                print_flush2("Выберите модель:")
+                for i, model in enumerate(key, 1):
+                    print_flush2(f"\n{i}. {model}\n")
+                model_choice = input("Введите номер модели: ")
+                if model_choice.isdigit() and 1 <= int(model_choice) and int(model_choice) <= len(models):
+                    model_choice = list(models.keys())[int(model_choice) - 1]
+                    print_flush2(f"Выбрана модель: {model_choice}\n")
+                    user_input = input(Fore.LIGHTGREEN_EX + "Вы: " + Fore.WHITE)
+                    response = await communicate_with_model(user_input, model_choice)
+                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    history.append((timestamp, user_input, response))
+
+                    print(Fore.YELLOW + "PipBoy 3000 LLM:" + Fore.WHITE, end=' ')
+                    print_flush3(response + "\n")
+
+                    # Сохранение истории в файл
+                    with open("history.txt", "a") as f:
+                        for entry in history:
+                            f.write(f"{entry[0]}\nВопрос пользователя: {entry[1]}\nОтвет PipBoy 3000: {entry[2]}\n\n")
+
             else:
-                response = await communicate_with_model(user_input)
+                response = await communicate_with_model(user_input, "o3-mini")
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 history.append((timestamp, user_input, response))
 
