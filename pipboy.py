@@ -1,4 +1,5 @@
 import os
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 import winreg
 import pygame
 import asyncio
@@ -9,8 +10,6 @@ import time
 from webscout import WEBS as w
 from datetime import datetime
 from colorama import init, Fore
-os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide" # Скрываю сообщения от pygame
-
 
 init()  # Инициализация colorama
 pygame.init()
