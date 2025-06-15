@@ -1,7 +1,6 @@
 colorama
-webscout
 asyncio
 pygame
 playsound==1.2.2
 pillow
-ollama
+packaging

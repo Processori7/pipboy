@@ -11,9 +11,11 @@ import ctypes
 import subprocess
 import shutil
 import threading
+import webbrowser
 
 from datetime import datetime
 from colorama import init, Fore
+from packaging import version
 
 # Инициализация
 init()
@@ -24,12 +26,41 @@ is_music_playing = False
 music_task = None
 
 # === Настройки ===
-CURRENT_VERSION = "1.3.4"
+CURRENT_VERSION = "1.5"
 config_file = "config.ini"
 ansi_folder = "C:\\pipboy\\"
 ansi_config_file_path = os.path.join(ansi_folder, config_file)
 
 # === Функции ===
+
+def update_app(update_url):
+   webbrowser.open(update_url)
+
+def check_for_updates():
+    try:
+        response = requests.get("https://api.github.com/repos/Processori7/pipboy/releases/latest")
+        response.raise_for_status()
+        latest_release = response.json()
+
+        assets = latest_release["assets"]
+        for asset in assets:
+            if asset["name"].endswith(".exe"):
+                download_url = asset["browser_download_url"]
+                break
+        else:
+            print("Не удалось найти файл exe для последней версии.")
+            return
+
+        latest_version_str = latest_release["tag_name"]
+        match = re.search(r'\d+\.\d+', latest_version_str)
+        latest_version = match.group() if match else latest_version_str
+
+        if version.parse(latest_version) > version.parse(CURRENT_VERSION):
+            ans = input(f"Доступна новая версия {latest_version}. Хотите обновить?\nВведите да - для обновления.\n>>> ").lower()
+            if ans == 'да':
+                update_app(download_url)
+    except requests.exceptions.RequestException as e:
+        print("Ошибка при проверке обновлений:", e)
 
 def remove_emojis(text):
     return re.sub(r'[\U00010000-\U0010ffff]', '', text)
@@ -242,6 +273,7 @@ async def get_Polinations_chat_models():
 
 # === Основная функция ===
 async def main():
+    check_for_updates()
     global is_music_playing, music_task
 
     # Проверяем администратора
@@ -343,15 +375,10 @@ async def main():
             if not is_music_playing:
                 music_thread = threading.Thread(target=play_music, daemon=True)
                 music_thread.start()
-            else:
-                print("🎵 Музыка уже играет.")
         elif user_input.lower() in ['стоп', 'stop']:
             if is_music_playing:
                 pygame.mixer.music.stop()
                 is_music_playing = False
-                print("Музыка остановлена.")
-            else:
-                print("Музыка не воспроизводится.")
         elif user_input.lower() in ['модель', 'model']:
             print("Сейчас используется:", model)
             print("Доступные модели:")
