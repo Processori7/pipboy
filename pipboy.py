@@ -273,7 +273,6 @@ async def get_Polinations_chat_models():
 
 # === Основная функция ===
 async def main():
-    check_for_updates()
     global is_music_playing, music_task
 
     # Проверяем администратора
@@ -399,4 +398,5 @@ async def main():
             print_flush3(response + "\n")
 
 if __name__ == "__main__":
+    check_for_updates()
     asyncio.run(main())
