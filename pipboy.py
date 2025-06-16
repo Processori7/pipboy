@@ -26,10 +26,10 @@ is_music_playing = False
 music_task = None
 
 # === Настройки ===
-CURRENT_VERSION = "1.5"
+CURRENT_VERSION = "1.6"
 config_file = "config.ini"
 ansi_folder = "C:\\pipboy\\"
-ansi_config_file_path = os.path.join(ansi_folder, config_file)
+pipboy_config_file_path = os.path.join(ansi_folder, config_file)
 
 # === Функции ===
 
@@ -66,7 +66,7 @@ def remove_emojis(text):
     return re.sub(r'[\U00010000-\U0010ffff]', '', text)
 
 def remove_sponsor_block(text):
-    return re.sub(r'\*\*Sponsor.*?---', '', text, flags=re.DOTALL).strip()
+    return re.sub(r'---\*\*Sponsor.*?', '', text, flags=re.DOTALL).strip()
 
 def sanitize_text(text):
     return remove_sponsor_block(remove_emojis(text))
@@ -74,7 +74,7 @@ def sanitize_text(text):
 async def read_config_from_drive_c():
     config = configparser.ConfigParser()
     try:
-        config.read(ansi_config_file_path)
+        config.read(pipboy_config_file_path)
         if 'model' in config and 'name' in config['model']:
             return config.get('model', 'name').strip()
         else:
@@ -84,10 +84,10 @@ async def read_config_from_drive_c():
         return 'o3-mini'
 
 async def read_model_config():
-    config = configparser.ConfigParser()
     try:
-        if os.path.exists(ansi_config_file_path):
-            config.read(ansi_config_file_path)
+        config = configparser.ConfigParser()
+        if os.path.exists(pipboy_config_file_path):
+            config.read(pipboy_config_file_path)
         else:
             config.read('config.ini')
         if 'model' in config and 'name' in config['model']:
@@ -109,7 +109,7 @@ async def write_model_config_to_drive_c(model_name):
     config = configparser.ConfigParser()
     config.add_section('model')
     config.set('model', 'name', str(model_name))
-    with open(ansi_config_file_path, 'w') as f:
+    with open(pipboy_config_file_path, 'w') as f:
         config.write(f)
 
 def play_music():
@@ -271,6 +271,54 @@ async def get_Polinations_chat_models():
         print(f"Ошибка при получении списка моделей: {e}")
         return ["o3-mini"]
 
+async def disable_history():
+    config = configparser.ConfigParser()
+
+    # Проверяем, существует ли файл конфигурации
+    if os.path.exists(pipboy_config_file_path):
+        config.read(pipboy_config_file_path)
+    else:
+        config.read('config.ini')
+
+    if not config.has_section('history'):
+        config.add_section('history')
+
+    # Устанавливаем значение 'write_history' в False, если его нет
+    config.set('history', 'write_history', 'False')
+
+    if os.path.exists(pipboy_config_file_path):
+        # Записываем изменения в файл конфигурации
+        with open(pipboy_config_file_path, 'w') as configfile:
+            config.write(configfile)
+    else:
+        with open(pipboy_config_file_path, 'w') as configfile:
+            config.write(configfile)
+
+async def enable_history():
+    config = configparser.ConfigParser()
+
+    # Проверяем, существует ли файл конфигурации
+    if os.path.exists(pipboy_config_file_path):
+        config.read(pipboy_config_file_path)
+    else:
+        config.read('config.ini')
+
+    # Проверяем, есть ли секция 'history'
+    if not config.has_section('history'):
+        config.add_section('history')
+
+        # Устанавливаем значение 'write_history' в True, если его нет
+    config.set('history', 'write_history', 'True')
+
+    # Записываем изменения в файл конфигурации
+    if os.path.exists(pipboy_config_file_path):
+        # Записываем изменения в файл конфигурации
+        with open(pipboy_config_file_path, 'w') as configfile:
+            config.write(configfile)
+    else:
+        with open(pipboy_config_file_path, 'w') as configfile:
+            config.write(configfile)
+
 # === Основная функция ===
 async def main():
     global is_music_playing, music_task
@@ -286,7 +334,7 @@ async def main():
             shutil.copy('music.mp3', ansi_folder)
 
     # Загрузка модели
-    if os.path.exists(ansi_config_file_path):
+    if os.path.exists(pipboy_config_file_path):
         model = await read_config_from_drive_c()
     else:
         model = await read_model_config()
@@ -350,7 +398,7 @@ async def main():
             """)
     print_flush2(
         """
-        Pipboy 3000 готов к общению.
+        Pipboy 3000 готов к общению. По умолчанию ведение истории выключено.
         Основные команды: 
         - Введите 'выход' или 'ex' или 'exit', чтобы завершить.
         - Введите 'очистить' или 'cls' или 'clear', чтобы удалить переписку.
@@ -358,6 +406,8 @@ async def main():
         - Введите 'музыка' или 'music' или 'старт' или 'start' для запуска музыки.
         - Введите 'стоп' или 'stop' для остановки воспроизведения.
         - Введите 'модель' или 'model' для выбора модели LLM.
+        - Введите 'dishistory' или 'выклисторию' чтобы выключить ведение истории
+        - Введите 'onhistory' или 'вклисторию' чтобы включить ведение истории
         """)
 
     while True:
@@ -385,17 +435,33 @@ async def main():
             choice = input("Введите название модели: ")
             if choice in models:
                 selected_model = choice
-                if os.path.exists(ansi_config_file_path):
+                if os.path.exists(pipboy_config_file_path):
                     await write_model_config_to_drive_c(selected_model)
                 else:
                     await write_model_config(selected_model)
                 print(f"Модель изменена на: {selected_model}")
                 model = selected_model
+        elif user_input.lower() in ['dishistory', 'выклисторию']:
+            await disable_history()
+            continue
+        elif user_input.lower() in ['onhistory', 'вклисторию']:
+            await enable_history()
+            continue
         else:
-            print(Fore.YELLOW + f"PipBoy 3000 LLM ({model}):" + Fore.WHITE, end=' ')
             response = await communicate_with_Pollinations_chat(user_input, model)
-            await save_histoy(user_input, response)
-            print_flush3(response + "\n")
+            all = f"PipBoy 3000 {model}: {response}"
+            config = configparser.ConfigParser()
+            if os.path.exists(pipboy_config_file_path):
+                config.read(pipboy_config_file_path)
+            else:
+                config.read('config.ini')
+
+            # Безопасная проверка на наличие write_history
+            if config.has_option('history', 'write_history'):
+                ans = config.get('history', 'write_history')
+                if ans.lower() == 'true':
+                    await save_histoy(user_input, all)
+            print_flush3(all + "\n")
 
 if __name__ == "__main__":
     check_for_updates()
